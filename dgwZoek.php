@@ -54,8 +54,7 @@ class dgwZoek
 		ts('Naam')	=>	'sort_name',
 		ts('Adres')	=>	'street_address',
 		ts('Postcode')	=>	'postal_code',
-		ts('Plaats')	=>	'city',
-		ts('Telefoon')	=>	'phone');	
+		ts('Plaats')	=>	'city');	
     }
 
     function buildForm( &$form ) {
@@ -105,11 +104,6 @@ class dgwZoek
                     ts( 'Plaats' ),
                     true );
                     
-        $form->add('text',
-		'phone',
-		ts( 'Telefoon' ),
-		true );
-
         /**
          * You can define a custom title for the search form
          */
@@ -121,7 +115,7 @@ class dgwZoek
          */
          $form->assign( 'elements', array( 'contact_type', 'last_name', 
 			'middle_name', 'initials', 'street_name', 'street_number', 
-			'postal_code_from', 'postal_code_to', 'city', 'phone' ) );
+			'postal_code_from', 'postal_code_to', 'city' ) );
     }
 
     function all( $offset = 0, $rowcount = 0, $sort = null,$includeContactIDs = false, $justIDs = false ) {
@@ -130,8 +124,7 @@ class dgwZoek
 			contact_a.sort_name as sort_name,
 			address.street_address as street_address,
 			address.postal_code as postal_code,
-			address.city as city, 		
-			phone.phone as phone";
+			address.city as city";
 		$sort = "sort_name";				
 
 		return $this->sql( $selectClause, $offset, $rowcount, $sort,
@@ -141,9 +134,7 @@ class dgwZoek
     
     function from( ) {
         return "FROM civicrm_contact contact_a LEFT JOIN civicrm_address 
-		address ON ( address.contact_id = contact_a.id) 
-		LEFT JOIN civicrm_phone phone ON ( phone.contact_id = 
-		contact_a.id)";
+		address ON ( address.contact_id = contact_a.id)";
     }
 
     function where( $includeContactIDs = false ) {
@@ -168,7 +159,6 @@ class dgwZoek
 	$pcto = CRM_Utils_Array::value( 'postal_code_to',
 		$this->_formValues );
 	$city = CRM_Utils_Array::value( 'city', $this->_formValues );
-	$phone = CRM_Utils_Array::value( 'phone', $this->_formValues );	
 		
 	$type = null;
 	$subtype = null;
@@ -270,17 +260,7 @@ class dgwZoek
 		$clause[] = "(address.city LIKE %{$count})";
 		$count++;
 	}
-		
-	if ( $phone != null ) {
-		if ( strpos( $phone, '%' ) === false ) {
-			$phone = "%{$phone}%";
-		}
-		
-		$params[$count] = array( $phone, 'String' );
-		$clause[] = "(phone.phone LIKE %{$count})";
-		$count++;
-	}
-		
+				
         if ( ! empty( $clause ) ) {
             $where = implode( ' AND ', $clause );
         }
@@ -321,7 +301,7 @@ class dgwZoek
         $sql = "SELECT $selectClause ".$this->from ( );
         $where = $this->where();
         if (!empty($where)) {
-			$sql .= " WHERE is_deleted = 0 AND ".$where;
+            $sql .= " WHERE is_deleted = 0 AND address.location_type_id = 1 AND ".$where;
 		}	
 
         if ( $includeContactIDs ) {

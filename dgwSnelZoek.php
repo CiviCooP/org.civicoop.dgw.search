@@ -94,13 +94,13 @@ class dgwSnelZoek
     }
 
     function all( $offset = 0, $rowcount = 0, $sort = null, $includeContactIDs = false, $justIDs = FALSE ) {
-        $selectClause = "contact_a.id as contact_id,
-						contact_a.contact_type as contact_type,
-						contact_a.sort_name as sort_name,
-						address.street_address as street_address,
-						address.postal_code as postal_code,
-						address.city as city, 		
-						phone.phone as phone";
+        $selectClause = "
+            a.id as contact_id,
+            a.contact_type as contact_type,
+            sort_name as sort_name,
+            b.street_address as street_address,
+            b.postal_code as postal_code,
+            b.city as city"; 		
 		$sort = "sort_name";				
 
 		return $this->sql( $selectClause, $offset, $rowcount, $sort,
@@ -109,10 +109,8 @@ class dgwSnelZoek
     }
     
     function from( ) {
-        return "FROM civicrm_contact contact_a LEFT JOIN civicrm_address 
-			address ON ( address.contact_id = contact_a.id ) 
-			LEFT JOIN civicrm_phone phone ON ( phone.contact_id = 
-			contact_a.id )";
+        return "FROM civicrm_contact a LEFT JOIN civicrm_address b
+                    ON ( b.contact_id = a.id )";
     }
 
     function where( $includeContactIDs = false ) {
@@ -141,13 +139,13 @@ class dgwSnelZoek
                                           
 		if ( $type != null ) {
 			$params[$count] = array( $type, 'String');
-			$clause[] = "(contact_a.contact_type = %{$count})";
+			$clause[] = "(a.contact_type = %{$count})";
 			$count++;
 		}
 
 		if ( $subtype != null ) {
 			$params[$count] = array( $subtype, 'String');
-			$clause[] = "(contact_a.contact_sub_type = %{$count})";
+			$clause[] = "(a.contact_sub_type = %{$count})";
 			$count++;
 		}
 			
@@ -156,7 +154,7 @@ class dgwSnelZoek
                 $name = "%{$name}%";
             }
             $params[$count] = array( $name, 'String' );
-            $clause[] = "(contact_a.sort_name LIKE %{$count})";
+            $clause[] = "(a.sort_name LIKE %{$count})";
             $count++;
         }
         
@@ -169,10 +167,9 @@ class dgwSnelZoek
 			 * incident 03 10 12 005 replace street_name with street_address
 			 */
 			//$clause[] = "(address.street_name LIKE %{$count})";
-			$clause[] = "(address.street_address LIKE %{$count})";
+			$clause[] = "(b.street_address LIKE %{$count})";
 			$count++;
 		}
-		
         if ( ! empty( $clause ) ) {
             $where = implode( ' AND ', $clause );
         }
@@ -212,7 +209,7 @@ class dgwSnelZoek
         $sql = "SELECT $selectClause ".$this->from ( );
         $where = $this->where();
         if (!empty($where)) {
-			$sql .= " WHERE is_deleted = 0 AND ".$where;
+			$sql .= " WHERE is_deleted = 0 AND location_type_id = 1 AND ".$where;
 		}	
 
         if ( $includeContactIDs ) {
