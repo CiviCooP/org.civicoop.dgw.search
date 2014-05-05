@@ -29,6 +29,11 @@
  | Author   :   Erik Hommel (EE-atWork, hommel@ee-atwork.nl)          |
  | Marj     :   dgwZoek                                               |
  | Descr.   :   Customized search for contacts                        |
+ |                                                                    |
+ | Incident : BOS1307269                                              |
+ | Date     : 05 May 2012                                             |
+ | Author   : Erik Hommel <erik.hommel@civicoop.org>                  |
+ | Descr.   : Search on VGE adres location type tpp                   |
  +--------------------------------------------------------------------+
 */
 
@@ -300,8 +305,12 @@ class dgwZoek
 
         $sql = "SELECT $selectClause ".$this->from ( );
         $where = $this->where();
+        /*
+         * BOS1307269 add location type VGE adres to search
+         */
+        $apiConfig = CRM_Utils_ApiConfig::singleton();
         if (!empty($where)) {
-            $sql .= " WHERE is_deleted = 0 AND address.location_type_id = 1 AND ".$where;
+            $sql .= " WHERE is_deleted = 0 AND (address.location_type_id = 1 OR address.location_type_id = ".$apiConfig->locationVgeAdresId.") AND ".$where;
 		}	
 
         if ( $includeContactIDs ) {
