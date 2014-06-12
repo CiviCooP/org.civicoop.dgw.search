@@ -132,8 +132,10 @@ class dgwZoek
 			address.city as city";
 		$sort = "sort_name";				
 
+    $groupBy = " GROUP BY contact_id ";
+    
 		return $this->sql( $selectClause, $offset, $rowcount, $sort,
-                           $includeContactIDs, null );
+                           $includeContactIDs, $groupBy );
 
     }
     

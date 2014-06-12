@@ -107,9 +107,11 @@ class dgwSnelZoek
             b.postal_code as postal_code,
             b.city as city"; 		
 		$sort = "sort_name";				
-
+    
+    $groupBy = " GROUP BY contact_id ";
+    
 		return $this->sql( $selectClause, $offset, $rowcount, $sort,
-                           $includeContactIDs, null );
+                           $includeContactIDs, $groupBy );
 
     }
     
