@@ -105,7 +105,8 @@ class dgwSnelZoek
             sort_name as sort_name,
             b.street_address as street_address,
             b.postal_code as postal_code,
-            b.city as city"; 		
+            b.city as city,
+            c.phone as phone ";
 		$sort = "sort_name";				
     
     $groupBy = " GROUP BY contact_id ";
@@ -116,8 +117,9 @@ class dgwSnelZoek
     }
     
     function from( ) {
-        return "FROM civicrm_contact a LEFT JOIN civicrm_address b
-                    ON ( b.contact_id = a.id )";
+        return "FROM civicrm_contact a 
+          LEFT JOIN civicrm_address b ON ( b.contact_id = a.id ) 
+          LEFT JOIN civicrm_phone c ON ( c.contact_id = a.id ) ";
     }
 
     function where( $includeContactIDs = false ) {
@@ -220,7 +222,7 @@ class dgwSnelZoek
          */
         $apiConfig = CRM_Utils_ApiConfig::singleton();
         if (!empty($where)) {
-			$sql .= " WHERE is_deleted = 0 AND (location_type_id = 1 OR location_type_id = ".$apiConfig->locationVgeAdresId.") AND ".$where;
+			$sql .= " WHERE is_deleted = 0 AND (b.location_type_id = 1 OR b.location_type_id = ".$apiConfig->locationVgeAdresId.") AND (c.location_type_id = 1) AND ".$where;
 		}	
 
         if ( $includeContactIDs ) {
