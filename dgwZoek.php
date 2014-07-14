@@ -129,7 +129,7 @@ class dgwZoek
 			contact_a.sort_name as sort_name,
 			address.street_address as street_address,
 			address.postal_code as postal_code,
-			address.city as city
+			address.city as city,
       phone.phone as phone ";
 		$sort = "sort_name";				
 
