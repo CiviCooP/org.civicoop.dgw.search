@@ -59,7 +59,8 @@ class dgwZoek
 		ts('Naam')	=>	'sort_name',
 		ts('Adres')	=>	'street_address',
 		ts('Postcode')	=>	'postal_code',
-		ts('Plaats')	=>	'city');	
+		ts('Plaats')	=>	'city',
+    ts('Telefoon')	=>	'phone');	
     }
 
     function buildForm( &$form ) {
