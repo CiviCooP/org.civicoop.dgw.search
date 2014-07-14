@@ -131,7 +131,7 @@ class dgwZoek
 			address.street_address as street_address,
 			address.postal_code as postal_code,
 			address.city as city,
-      phone.phone as phone ";
+      p.phone as phone ";
 		$sort = "sort_name";				
 
     $groupBy = " GROUP BY contact_id ";
@@ -144,7 +144,7 @@ class dgwZoek
     function from( ) {
         return "FROM civicrm_contact contact_a 
           LEFT JOIN civicrm_address address ON ( address.contact_id = contact_a.id)
-          LEFT JOIN civicrm_phone phone ON ( phone.contact_id = contact_a.id ) ";
+          LEFT JOIN civicrm_phone p ON ( p.contact_id = contact_a.id ) ";
     }
 
     function where( $includeContactIDs = false ) {
