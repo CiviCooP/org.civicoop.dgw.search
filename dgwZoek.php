@@ -66,10 +66,10 @@ class dgwZoek
     function buildForm( &$form ) {
 	$contactTypes = array( '' => ts('- alle contact types -') ) + CRM_Contact_BAO_ContactType::getSelectElements( );
         $form->add(	'select', 
-			'contact_type', 
-			ts('Contact type'), 
-			$contactTypes );
-
+                    'contact_type', 
+                    ts('Contact type'), 
+                    $contactTypes );
+        
         $form->add( 'text',
                     'last_name',
                     ts( 'Achternaam' ),
@@ -89,12 +89,20 @@ class dgwZoek
                     'street_name',
                     ts( 'Straat' ),
                     true );
+        
+        $form->add( 'checkbox',
+                    'search_exact_street_name',
+                    ts( 'Zoek op exacte straat' ));
                     
         $form->add( 'text',
                     'street_number',
                     ts( 'Huisnr' ),
                     true );
-                    
+        
+        $form->add( 'checkbox',
+                    'search_exact_street_number',
+                    ts( 'Zoek op exacte huisnr' ));
+        
         $form->add( 'text',
                     'postal_code_from',
                     ts( 'Postcode van' ),
@@ -109,7 +117,7 @@ class dgwZoek
                     'city',
                     ts( 'Plaats' ),
                     true );
-                    
+        
         /**
          * You can define a custom title for the search form
          */
@@ -120,7 +128,7 @@ class dgwZoek
          * are part of the search criteria
          */
          $form->assign( 'elements', array( 'contact_type', 'last_name', 
-			'middle_name', 'initials', 'street_name', 'street_number', 
+			'middle_name', 'initials', 'street_name', 'search_exact_street_name', 'street_number', 'search_exact_street_number', 
 			'postal_code_from', 'postal_code_to', 'city' ) );
     }
 
@@ -153,23 +161,29 @@ class dgwZoek
         $clause = array( );
 		
         $types = CRM_Utils_Array::value( 'contact_type', 
-		$this->_formValues );
+          $this->_formValues );
         $last   = CRM_Utils_Array::value( 'last_name',
-		$this->_formValues );
+          $this->_formValues );
         $middle = CRM_Utils_Array::value( 'middle_name',
             $this->_formValues );
         $first = CRM_Utils_Array::value( 'initials',
-		$this->_formValues );
-	$street = CRM_Utils_Array::value( 'street_name',
-		$this->_formValues );	
-	$number = CRM_Utils_Array::value( 'street_number',
-		$this->_formValues );
-	$pcfrom = CRM_Utils_Array::value( 'postal_code_from',
-		$this->_formValues );
-	$pcto = CRM_Utils_Array::value( 'postal_code_to',
-		$this->_formValues );
-	$city = CRM_Utils_Array::value( 'city', $this->_formValues );
-		
+          $this->_formValues );
+        $street = CRM_Utils_Array::value( 'street_name',
+          $this->_formValues );	
+              $search_exact_street_name = CRM_Utils_Array::value( 'search_exact_street_name', 
+                $this->_formValues );
+        $number = CRM_Utils_Array::value( 'street_number',
+          $this->_formValues );
+
+        $search_exact_street_number = CRM_Utils_Array::value( 'search_exact_street_number', 
+            $this->_formValues );
+
+        $pcfrom = CRM_Utils_Array::value( 'postal_code_from',
+          $this->_formValues );
+        $pcto = CRM_Utils_Array::value( 'postal_code_to',
+          $this->_formValues );
+        $city = CRM_Utils_Array::value( 'city', $this->_formValues );
+  
 	$type = null;
 	$subtype = null;
 	if ( $types != null ) {
@@ -223,7 +237,9 @@ class dgwZoek
 			
 	if ( $street != null ) {
 		if ( strpos( $street, '%' ) === false ) {
-			$first = "%{$first}%";
+      if(!$search_exact_street_name){
+        $street = "%{$street}%";
+      }
 		}
 		$params[$count] = array( $street, 'String' );
 		$clause[] = "(address.street_name LIKE %{$count})";
@@ -234,6 +250,11 @@ class dgwZoek
 		/*
 		 * if number is not numeric, error
 		 */
+    if ( strpos( $number, '%' ) === false ) {
+      if(!$search_exact_street_number){
+        $number = "%{$number}%";
+      }
+		}
 		$params[$count] = array( $number, 'String' );
 		$clause[] = "(address.street_number LIKE %{$count})";
 		$count++;
@@ -299,7 +320,7 @@ class dgwZoek
      */
     function count( ) {
         $sql = $this->all( );
-           
+                 
         $dao = CRM_Core_DAO::executeQuery( $sql );
         return $dao->N;
     }

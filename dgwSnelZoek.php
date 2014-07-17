@@ -71,10 +71,10 @@ class dgwSnelZoek
     function buildForm( &$form ) {
 		$contactTypes = array( '' => ts('- alle contact types -') ) + CRM_Contact_BAO_ContactType::getSelectElements( );
         $form->add('select', 
-					'contact_type', 
-					ts('Contact type'), 
-					$contactTypes );
-
+                    'contact_type', 
+                    ts('Contact type'), 
+                    $contactTypes );
+        
         $form->add( 'text',
                     'sort_name',
                     ts( 'Naam (Achternaam, voorletters, tussenvoegsel)' ),
@@ -84,6 +84,10 @@ class dgwSnelZoek
                     'street_address',
                     ts( 'Straat (en evt. huisnummer)' ),
                     true );
+        
+        $form->add( 'checkbox',
+                    'search_exact_street_address',
+                    ts( 'Zoek op exacte straat' ));
 
         /**
          * You can define a custom title for the search form
@@ -95,7 +99,7 @@ class dgwSnelZoek
          * are part of the search criteria
          */
          $form->assign( 'elements', array( 'contact_type', 'sort_name', 
-			'street_address' ) );
+			'street_address', 'search_exact_street_address' ) );
     }
 
     function all( $offset = 0, $rowcount = 0, $sort = null, $includeContactIDs = false, $justIDs = FALSE ) {
@@ -122,7 +126,7 @@ class dgwSnelZoek
           LEFT JOIN civicrm_phone c ON ( c.contact_id = a.id ) ";
     }
 
-    function where( $includeContactIDs = false ) {
+    function where( $includeContactIDs = false ) {      
         $params = array( );
         $count  = 1;
         $clause = array( );
@@ -133,7 +137,9 @@ class dgwSnelZoek
 			$this->_formValues );
         $address = CRM_Utils_Array::value( 'street_address',
             $this->_formValues );
-		
+        $search_exact_street_address = CRM_Utils_Array::value( 'search_exact_street_address', 
+          $this->_formValues );
+        
 		$type = null;
 		$subtype = null;
 		if ( $types != null ) {
@@ -167,18 +173,21 @@ class dgwSnelZoek
             $count++;
         }
         
-        if ( $address != null ) {
-			if ( strpos( $address, '%' ) === false ) {
-				$address = "%{$address}%";
-			}
-			$params[$count] = array( $address, 'String' );
-			/*
-			 * incident 03 10 12 005 replace street_name with street_address
-			 */
-			//$clause[] = "(address.street_name LIKE %{$count})";
-			$clause[] = "(b.street_address LIKE %{$count})";
-			$count++;
-		}
+      if ( $address != null ) {
+        if ( strpos( $address, '%' ) === false ) {
+          if(!$search_exact_street_address){
+            $address = "%{$address}%";
+          }
+        }
+        $params[$count] = array( $address, 'String' );
+        /*
+         * incident 03 10 12 005 replace street_name with street_address
+         */
+        //$clause[] = "(address.street_name LIKE %{$count})";
+        $clause[] = "(b.street_address LIKE %{$count})";
+
+        $count++;
+      }
         if ( ! empty( $clause ) ) {
             $where = implode( ' AND ', $clause );
         }
@@ -206,7 +215,7 @@ class dgwSnelZoek
      */
     function count( ) {
         $sql = $this->all( );
-           
+        
         $dao = CRM_Core_DAO::executeQuery( $sql );
         return $dao->N;
     }
