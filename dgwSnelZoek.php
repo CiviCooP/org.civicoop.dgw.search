@@ -87,7 +87,7 @@ class dgwSnelZoek
         
         $form->add( 'checkbox',
                     'search_exact_street_address',
-                    ts( 'Zoek op exacte straat' ));
+                    ts( 'Zoek op exacte adres' ));
 
         /**
          * You can define a custom title for the search form
