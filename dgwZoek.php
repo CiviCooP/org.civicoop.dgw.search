@@ -130,6 +130,13 @@ class dgwZoek
          $form->assign( 'elements', array( 'contact_type', 'last_name', 
 			'middle_name', 'initials', 'street_name', 'search_exact_street_name', 'street_number', 'search_exact_street_number', 
 			'postal_code_from', 'postal_code_to', 'city' ) );
+         
+        /**
+         * set default values
+         */
+        $form->setDefaults(array(
+          'search_exact_street_number' => '1'
+        ));
     }
 
     function all( $offset = 0, $rowcount = 0, $sort = null,$includeContactIDs = false, $justIDs = false ) {
